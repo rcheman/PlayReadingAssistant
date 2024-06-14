@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE characters\n    SET actor_id = $1\n    WHERE script_id = $2 AND id = $3\n    RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "script_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "actor_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "line_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "speaks_count",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "16d0de6c50986bd5375ef405d6ade4831e2f23ffc826e5245ff61cd6286589ad"
+}
