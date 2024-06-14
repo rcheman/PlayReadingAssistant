@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO read_position (actor_id, script_id, position)\n             VALUES ($1, $2, $3)\n         ON CONFLICT ON CONSTRAINT read_position_uq\n             DO UPDATE SET position = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ef13ba3bf243fa61d3ed9b1664fdc6ea1e2d1c910bf786c3b792af1ac5ceb1da"
+}

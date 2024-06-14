@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, name, line_count, speaks_count, actor_id\n        FROM characters\n        WHERE ($1 = -1 or actor_id = $1)\n        AND script_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "line_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "speaks_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "actor_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "f48b01275b03da0ef8944106553969d55027d8b4ad7ff5efea8309fb5a92ec5c"
+}
