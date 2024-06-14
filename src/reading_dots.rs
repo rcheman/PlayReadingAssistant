@@ -1,13 +1,17 @@
-use crate::AppState;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
+
 use actix_web::{get, post, web, HttpResponse, Responder};
 use actix_web_lab::__reexports::futures_util::future;
 use actix_web_lab::__reexports::tokio;
-use actix_web_lab::sse::{self, ChannelStream, Sse};
+use actix_web_lab::sse;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
-use std::sync::Arc;
+use tokio::sync::mpsc::Sender;
 use tokio::sync::Mutex;
+
+use crate::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -26,7 +30,7 @@ struct BroadcastMessage {
 
 // clients is map of scriptId to vector of subscribers of that id
 pub struct Broadcaster {
-    clients: Mutex<HashMap<String, Vec<sse::Sender>>>,
+    clients: Mutex<HashMap<String, Vec<Sender<sse::Event>>>>,
 }
 
 impl Broadcaster {
@@ -40,13 +44,13 @@ impl Broadcaster {
         &self,
         script_id: i32,
         current_messages: Vec<String>,
-    ) -> Sse<ChannelStream> {
-        let (tx, rx) = sse::channel(10);
+    ) -> impl Responder {
+        let (tx, rx) = tokio::sync::mpsc::channel(10);
 
         // Send existing positions to new client
         let send_futures = current_messages
             .into_iter()
-            .map(|m| tx.send(sse::Data::new(m)));
+            .map(|m| tx.send(sse::Event::Data(sse::Data::new(m))));
         let _ = future::join_all(send_futures).await;
 
         // Save client for later broadcasts
@@ -64,7 +68,7 @@ impl Broadcaster {
             }
         }
 
-        rx
+        sse::Sse::from_infallible_receiver(rx).with_retry_duration(Duration::from_secs(10))
     }
 
     pub async fn send_message(&self, script_id: i32, message: String) {
@@ -74,7 +78,7 @@ impl Broadcaster {
             // Send message to all subscribers of this script
             let send_futures = senders
                 .iter()
-                .map(|s| s.send(sse::Data::new(message.clone())));
+                .map(|s| s.send(sse::Event::Data(sse::Data::new(message.clone()))));
             let results = future::join_all(send_futures).await;
 
             // Remove subscribers we failed to send the message to, they have probably disconnected
